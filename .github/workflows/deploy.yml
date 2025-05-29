@@ -1,0 +1,53 @@
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: [ 'main' ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Build
+      - run: yarn
+      - run: yarn build
+
+      #      # Deploy
+      #      - name: Upload files to Object Storage
+      #        id: s3-upload
+      #        uses: yc-actions/yc-obj-storage-upload@v2
+      #        with:
+      #          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      #          bucket: ${{ secrets.BUCKET }}
+      #          root: ./dist
+      #          include: |
+      #            **/*
+
+      - name: Get current date
+        id: current_date
+        run: |
+          date=$(date +'%Y-%m-%dT%H.%M')
+          echo "Current date: $date"
+          echo "CURRENT_DATE=$date" >> "$GITHUB_OUTPUT"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: release_${{ steps.current_date.outputs.CURRENT_DATE }}
+          files: dist.zip
+#      - uses: "marvinpinto/action-automatic-releases@latest"
+#        with:
+#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#          automatic_release_tag: "latest"
+#          prerelease: false
+#          title: "Latest Release"
+#          files: |
+#            dist.zip
+
