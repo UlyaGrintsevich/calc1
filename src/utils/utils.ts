@@ -9,6 +9,7 @@ export type AverageData = {
     [key in PERIOD]: number | null
 };
 
+
 export function buildData(input: number): CalculationData {
     return ORGANIZATIONS.reduce((acc, org) => {
         acc[org] = PERIODS.reduce((innerAcc, period) => {
